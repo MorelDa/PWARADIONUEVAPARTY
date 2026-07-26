@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RADIO PARTY - En Vivo</title>
+
+  <!-- Open Graph / Meta para Redes Sociales -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" id="ogTitle" content="RADIO PARTY - Transmisión en Vivo">
+  <meta property="og:description" content="Escucha en directo. La mejor música y programas en vivo.">
+  <meta property="og:image" id="ogImage" content="https://i.ibb.co/NgBNjPgh/LOGO.png">
+
+  <!-- Favicon e iOS -->
+  <link rel="icon" type="image/png" id="faviconImg" href="https://i.ibb.co/NgBNjPgh/LOGO.png">
+  <link rel="apple-touch-icon" id="appleTouchIcon" href="https://i.ibb.co/NgBNjPgh/LOGO.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" id="appleAppTitle" content="Radio Party">
+  <meta name="theme-color" content="#2563eb">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --dynamic-color: #2563eb;
+      --dynamic-light: rgba(37, 99, 235, 0.15);
+      --overlay-color: rgba(37, 99, 235, 0.55);
+      --bg-main: #000000;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --text-main: #ffffff;
+      --text-sub: #e2e8f0;
+      --red-live: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Video de Fondo General */
+    .bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    /* Capa de Superposición con el Color del Logo */
+    .bg-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--overlay-color);
+      mix-blend-mode: multiply;
+      z-index: 1;
+      transition: background-color 0.5s ease;
+    }
+
+    .app-viewport {
+      width: 100%;
+      height: 100dvh;
+      max-width: 430px;
+      max-height: 932px;
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    @media (min-width: 480px) {
+      .app-viewport {
+        height: 850px;
+        border-radius: 40px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 24px 10px;
+      z-index: 10;
+    }
+
+    .header-btn {
+      background: none;
+      border: none;
+      color: #ffffff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    .header-right-btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(5px);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    /* Estilo para ocultar el botón dinámicamente */
+    .hidden {
+      display: none !important;
+    }
+
+    .visualizer-area {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 260px;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .logo-container {
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: transform 0.08s ease-out, border-color 0.4s ease;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #ffffff;
+      border: 3px solid var(--dynamic-color);
+    }
+
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display: block;
+    }
+
+    .info-container {
+      text-align: center;
+      padding: 0 20px;
+      margin-bottom: 5px;
+      z-index: 10;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--red-live);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--red-live);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--red-live);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .station-title {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+
+    .show-name {
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .now-playing {
+      color: var(--text-sub);
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 300px;
+      margin: 0 auto;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .controls-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 32px;
+      margin: 15px 0;
+      z-index: 10;
+    }
+
+    .social-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(5px);
+      color: #ffffff;
+      font-size: 1.2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .social-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .play-btn-outer {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .play-btn-inner {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: var(--dynamic-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #ffffff;
+      font-size: 1.3rem;
+      transition: transform 0.1s, background-color 0.4s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .play-btn-outer:active .play-btn-inner {
+      transform: scale(0.92);
+    }
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 0 45px;
+      margin-bottom: 25px;
+      z-index: 10;
+    }
+
+    .volume-icon {
+      color: var(--text-sub);
+      font-size: 0.85rem;
+    }
+
+    .volume-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.3);
+      outline: none;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Video de fondo + Capa de Color -->
+  <video class="bg-video" autoplay loop muted playsinline id="bgVideo">
+    <source src="https://github.com/MorelDa/SPLENDOR-DISCO/raw/refs/heads/main/WILMERDJROBATEESTOJAJAJAJ.mp4" type="video/mp4">
+  </video>
+  <div class="bg-overlay" id="bgOverlay"></div>
+
+  <div class="app-viewport">
+    
+    <header class="header">
+      <button class="header-btn" title="Menú"><i class="fa-solid fa-bars"></i></button>
+
+      <div class="header-right-btns">
+        <!-- Botón Instalar App (Se oculta al instalar) -->
+        <button class="action-btn" id="installBtn">
+          <i class="fa-solid fa-download"></i> App
+        </button>
+
+        <!-- Botón Compartir (Siempre visible) -->
+        <button class="action-btn" id="shareBtn" title="Compartir">
+          <i class="fa-solid fa-share-nodes"></i> Compartir
+        </button>
+      </div>
+    </header>
+
+    <div class="visualizer-area">
+      <canvas id="waveCanvas"></canvas>
+      <div class="logo-container" id="logoContainer">
+        <img src="https://i.ibb.co/NgBNjPgh/LOGO.png" alt="Logo Radio" class="logo-img" id="logoImg" crossorigin="anonymous">
+      </div>
+    </div>
+
+    <div class="info-container">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span>EN VIVO</span>
+      </div>
+      <h1 class="station-title">RADIO PARTY</h1>
+      <h2 class="show-name">Transmisión Online</h2>
+      <p class="now-playing">Escuchando la señal en directo</p>
+    </div>
+
+    <div class="controls-container">
+      <!-- WhatsApp -->
+      <a href="https://wa.me/" target="_blank" class="social-btn" id="wsBtn" title="WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+      
+      <div class="play-btn-outer" id="playBtn">
+        <div class="play-btn-inner" id="playBtnInner">
+          <i class="fa-solid fa-play" id="playIcon"></i>
+        </div>
+      </div>
+
+      <!-- TikTok -->
+      <a href="https://tiktok.com" target="_blank" class="social-btn" id="tkBtn" title="TikTok">
+        <i class="fa-brands fa-tiktok"></i>
+      </a>
+    </div>
+
+    <div class="volume-container">
+      <i class="fa-solid fa-volume-low volume-icon"></i>
+      <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+      <i class="fa-solid fa-volume-high volume-icon"></i>
+    </div>
+
+  </div>
+
+  <audio id="audioPlayer" src="https://miestacion.turadioonline.com.ar:8286/stream" crossorigin="anonymous"></audio>
+
+  <script>
+    // --- LÓGICA DE INSTALACIÓN Y VISIBILIDAD DEL BOTÓN ---
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    // Comprobar si ya está instalada la PWA
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isStandalone) {
+      installBtn.classList.add('hidden');
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.classList.remove('hidden');
+    });
+
+    installBtn.addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            installBtn.classList.add('hidden');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        alert('Para instalar en iOS:\nToca "Compartir" en Safari y selecciona "Agregar a inicio".\n\nEn Android:\nAbre el menú de Chrome y elige "Instalar aplicación".');
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      installBtn.classList.add('hidden');
+    });
+
+    // --- LÓGICA DE COMPARTIR ---
+    const shareBtn = document.getElementById('shareBtn');
+    shareBtn.addEventListener('click', async () => {
+      const shareData = {
+        title: document.title,
+        text: '¡Escucha RADIO PARTY en vivo!',
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+        } catch (err) {
+          console.log('Compartir cancelado');
+        }
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('¡Enlace copiado al portapapeles!');
+      }
+    });
+
+    // --- REPRODUCTOR & VISUALIZADOR ---
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const audio = document.getElementById('audioPlayer');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
+    const logoImg = document.getElementById('logoImg');
+    const logoContainer = document.getElementById('logoContainer');
+
+    let isPlaying = false;
+    let audioContext, analyser, source, dataArray;
+    let primaryRGB = { r: 37, g: 99, b: 235 };
+    let rotationAngle = 0;
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function extractColorFromImage(url) {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = url;
+
+      img.onload = () => {
+        try {
+          const tempCanvas = document.createElement('canvas');
+          const tempCtx = tempCanvas.getContext('2d');
+          tempCanvas.width = 64;
+          tempCanvas.height = 64;
+          tempCtx.drawImage(img, 0, 0, 64, 64);
+
+          const imageData = tempCtx.getImageData(0, 0, 64, 64);
+          const data = imageData.data;
+          let rSum = 0, gSum = 0, bSum = 0, count = 0;
+
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i + 1], b = data[i + 2], alpha = data[i + 3];
+            if (alpha > 180) {
+              const brightness = (r + g + b) / 3;
+              if (brightness > 35 && brightness < 225) {
+                rSum += r; gSum += g; bSum += b; count++;
+              }
+            }
+          }
+
+          if (count > 0) {
+            primaryRGB = {
+              r: Math.round(rSum / count),
+              g: Math.round(gSum / count),
+              b: Math.round(bSum / count)
+            };
+            document.documentElement.style.setProperty('--dynamic-color', `rgb(${primaryRGB.r}, ${primaryRGB.g}, ${primaryRGB.b})`);
+            document.documentElement.style.setProperty('--overlay-color', `rgba(${primaryRGB.r}, ${primaryRGB.g}, ${primaryRGB.b}, 0.55)`);
+          }
+        } catch (e) {
+          console.warn("Origen limitado para color.", e);
+        }
+      };
+    }
+
+    // Leer Configuración JSON
+    fetch('config.json')
+      .then(res => res.json())
+      .then(config => {
+        if (config.stationTitle) {
+          document.querySelector('.station-title').textContent = config.stationTitle;
+          document.title = `${config.stationTitle} - En Vivo`;
+        }
+        if (config.showName) document.querySelector('.show-name').textContent = config.showName;
+        if (config.streamUrl) audio.src = config.streamUrl;
+        if (config.whatsappUrl) document.getElementById('wsBtn').href = config.whatsappUrl;
+        if (config.tiktokUrl) document.getElementById('tkBtn').href = config.tiktokUrl;
+        if (config.logoUrl) {
+          logoImg.src = config.logoUrl;
+          extractColorFromImage(config.logoUrl);
+        }
+      })
+      .catch(() => extractColorFromImage(logoImg.src));
+
+    function initAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        source = audioContext.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        analyser.fftSize = 128;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+      }
+    }
+
+    function drawVisualizer() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = 98;
+      const numBars = 56;
+
+      if (isPlaying && analyser) {
+        analyser.getByteFrequencyData(dataArray);
+      }
+
+      rotationAngle += isPlaying ? 0.012 : 0.004;
+
+      if (isPlaying && dataArray) {
+        const bassPower = (dataArray[0] + dataArray[1] + dataArray[2]) / 3;
+        logoContainer.style.transform = `scale(${1 + (bassPower / 255) * 0.035})`;
+      } else {
+        logoContainer.style.transform = `scale(1)`;
+      }
+
+      ctx.lineCap = 'round';
+
+      for (let i = 0; i < numBars; i++) {
+        const angle = (i * 2 * Math.PI) / numBars + rotationAngle;
+        let barHeight = 4;
+
+        if (isPlaying && dataArray) {
+          const half = numBars / 2;
+          const index = i < half ? i : numBars - i;
+          const dataIndex = Math.floor((index / half) * (dataArray.length - 1));
+          barHeight = (dataArray[dataIndex] / 255) * 26 + 4;
+        } else {
+          barHeight = Math.sin(Date.now() * 0.003 + i * 0.25) * 3 + 5;
+        }
+
+        const x1 = centerX + Math.cos(angle) * radius;
+        const y1 = centerY + Math.sin(angle) * radius;
+        const x2 = centerX + Math.cos(angle) * (radius + barHeight);
+        const y2 = centerY + Math.sin(angle) * (radius + barHeight);
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = `rgb(${primaryRGB.r}, ${primaryRGB.g}, ${primaryRGB.b})`;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      requestAnimationFrame(drawVisualizer);
+    }
+
+    playBtn.addEventListener('click', () => {
+      initAudioContext();
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+
+      if (!isPlaying) {
+        audio.play().then(() => {
+          isPlaying = true;
+          playIcon.className = 'fa-solid fa-pause';
+        }).catch(err => console.error(err));
+      } else {
+        audio.pause();
+        isPlaying = false;
+        playIcon.className = 'fa-solid fa-play';
+      }
+    });
+
+    volumeSlider.addEventListener('input', (e) => { audio.volume = e.target.value; });
+    drawVisualizer();
+  </script>
+</body>
+</html>

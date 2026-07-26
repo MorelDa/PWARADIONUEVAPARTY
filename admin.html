@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Radio App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f1f5f9; color: #0f172a; display: flex; justify-content: center; padding: 20px; }
+    .admin-card { background: #ffffff; width: 100%; max-width: 500px; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    h1 { font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #2563eb; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 6px; }
+    input[type="text"], input[type="url"] { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none; }
+    input[type="text"]:focus, input[type="url"]:focus { border-color: #2563eb; }
+    .btn-group { display: flex; gap: 10px; margin-top: 24px; }
+    button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-secondary { background: #e2e8f0; color: #475569; }
+    .status-msg { margin-top: 15px; font-size: 0.85rem; text-align: center; color: #16a34a; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="admin-card">
+    <h1><i class="fa-solid fa-sliders"></i> Admin Radio App</h1>
+
+    <div class="form-group">
+      <label>Nombre de la Emisora</label>
+      <input type="text" id="stationTitle" value="RADIO PARTY">
+    </div>
+
+    <div class="form-group">
+      <label>Subtítulo / Programa</label>
+      <input type="text" id="showName" value="Transmisión Online">
+    </div>
+
+    <div class="form-group">
+      <label>URL Streaming Audio (Stream)</label>
+      <input type="url" id="streamUrl" value="https://miestacion.turadioonline.com.ar:8286/stream">
+    </div>
+
+    <div class="form-group">
+      <label>URL Imagen del Logo</label>
+      <input type="url" id="logoUrl" value="https://i.ibb.co/NgBNjPgh/LOGO.png">
+    </div>
+
+    <div class="form-group">
+      <label>URL / Enlace de WhatsApp</label>
+      <input type="url" id="whatsappUrl" value="https://wa.me/">
+    </div>
+
+    <div class="form-group">
+      <label>URL / Perfil de TikTok</label>
+      <input type="url" id="tiktokUrl" value="https://tiktok.com">
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-secondary" onclick="cargarConfigExistente()"><i class="fa-solid fa-rotate"></i> Cargar config.json</button>
+      <button class="btn-primary" onclick="descargarJSON()"><i class="fa-solid fa-download"></i> Generar config.json</button>
+    </div>
+
+    <div id="statusMsg" class="status-msg"></div>
+  </div>
+
+  <script>
+    function descargarJSON() {
+      const config = {
+        stationTitle: document.getElementById('stationTitle').value,
+        showName: document.getElementById('showName').value,
+        streamUrl: document.getElementById('streamUrl').value,
+        logoUrl: document.getElementById('logoUrl').value,
+        whatsappUrl: document.getElementById('whatsappUrl').value,
+        tiktokUrl: document.getElementById('tiktokUrl').value
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "config.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+
+      document.getElementById('statusMsg').innerText = '¡config.json generado!';
+    }
+
+    function cargarConfigExistente() {
+      fetch('config.json')
+        .then(res => res.json())
+        .then(data => {
+          if (data.stationTitle) document.getElementById('stationTitle').value = data.stationTitle;
+          if (data.showName) document.getElementById('showName').value = data.showName;
+          if (data.streamUrl) document.getElementById('streamUrl').value = data.streamUrl;
+          if (data.logoUrl) document.getElementById('logoUrl').value = data.logoUrl;
+          if (data.whatsappUrl) document.getElementById('whatsappUrl').value = data.whatsappUrl;
+          if (data.tiktokUrl) document.getElementById('tiktokUrl').value = data.tiktokUrl;
+          document.getElementById('statusMsg').innerText = 'Configuración cargada.';
+        })
+        .catch(() => {
+          document.getElementById('statusMsg').innerText = 'No se encontró config.json previo.';
+        });
+    }
+  </script>
+</body>
+</html>
