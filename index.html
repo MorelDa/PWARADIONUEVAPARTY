@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RADIO PARTY - En Vivo</title>
+  <meta name="description" content="Escucha RADIO PARTY en vivo. La mejor música y programas en directo, 24/7.">
+
+  <!-- Open Graph / Redes Sociales -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" id="ogTitle" content="RADIO PARTY - Transmisión en Vivo">
+  <meta property="og:description" content="Escucha en directo. La mejor música y programas en vivo.">
+  <meta property="og:image" id="ogImage" content="https://i.ibb.co/NgBNjPgh/LOGO.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" id="appleAppTitle" content="Radio Party">
+  <link rel="apple-touch-icon" id="appleTouchIcon" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" id="faviconImg" href="icons/icon-192.png">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Anti-copiar básico (deshabilita menú contextual, selección y devtools shortcuts) -->
+  <script>
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || (e.ctrlKey && e.key === 'U')) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</head>
+<body>
+
+  <!-- Video de fondo + Capa de Color dinámico -->
+  <video class="bg-video" autoplay loop muted playsinline id="bgVideo" poster="">
+    <source src="https://github.com/MorelDa/SPLENDOR-DISCO/raw/refs/heads/main/WILMERDJROBATEESTOJAJAJAJ.mp4" type="video/mp4">
+  </video>
+  <div class="bg-overlay" id="bgOverlay"></div>
+
+  <div class="app-viewport">
+
+    <header class="header">
+      <button class="header-btn" id="menuBtn" title="Menú" aria-label="Abrir menú">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="header-right-btns">
+        <button class="action-btn" id="installBtn" aria-label="Instalar aplicación">
+          <i class="fa-solid fa-download"></i> Instalar
+        </button>
+        <button class="action-btn" id="shareBtn" title="Compartir" aria-label="Compartir">
+          <i class="fa-solid fa-share-nodes"></i> Compartir
+        </button>
+      </div>
+    </header>
+
+    <div class="visualizer-area">
+      <canvas id="waveCanvas" aria-hidden="true"></canvas>
+      <div class="logo-container" id="logoContainer">
+        <img src="https://i.ibb.co/NgBNjPgh/LOGO.png" alt="Logo Radio" class="logo-img" id="logoImg" crossorigin="anonymous">
+      </div>
+    </div>
+
+    <div class="info-container">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span>EN VIVO</span>
+      </div>
+      <h1 class="station-title">RADIO PARTY</h1>
+      <h2 class="show-name">Transmisión Online</h2>
+      <p class="now-playing" id="nowPlaying">Escuchando la señal en directo</p>
+    </div>
+
+    <div class="controls-container">
+      <a href="#" target="_blank" rel="noopener" class="social-btn" id="wsBtn" title="WhatsApp" aria-label="WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+
+      <div class="play-btn-outer" id="playBtn" role="button" tabindex="0" aria-label="Reproducir">
+        <div class="play-btn-inner" id="playBtnInner">
+          <i class="fa-solid fa-play" id="playIcon"></i>
+        </div>
+      </div>
+
+      <a href="#" target="_blank" rel="noopener" class="social-btn" id="tkBtn" title="TikTok" aria-label="TikTok">
+        <i class="fa-brands fa-tiktok"></i>
+      </a>
+    </div>
+
+    <div class="volume-container">
+      <i class="fa-solid fa-volume-low volume-icon" aria-hidden="true"></i>
+      <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" aria-label="Volumen">
+      <i class="fa-solid fa-volume-high volume-icon" aria-hidden="true"></i>
+    </div>
+
+  </div>
+
+  <!-- Modal de Compartir en Redes Sociales -->
+  <div class="share-modal" id="shareModal" aria-hidden="true">
+    <div class="share-content">
+      <div class="share-header">
+        <h3>Compartir RADIO PARTY</h3>
+        <button class="share-close" id="shareClose" aria-label="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="share-grid">
+        <button class="share-item" data-share="whatsapp" aria-label="Compartir en WhatsApp">
+          <div class="share-icon" style="background:#25D366"><i class="fa-brands fa-whatsapp"></i></div>
+          <span>WhatsApp</span>
+        </button>
+        <button class="share-item" data-share="facebook" aria-label="Compartir en Facebook">
+          <div class="share-icon" style="background:#1877F2"><i class="fa-brands fa-facebook-f"></i></div>
+          <span>Facebook</span>
+        </button>
+        <button class="share-item" data-share="twitter" aria-label="Compartir en Twitter/X">
+          <div class="share-icon" style="background:#000000"><i class="fa-brands fa-x-twitter"></i></div>
+          <span>X / Twitter</span>
+        </button>
+        <button class="share-item" data-share="telegram" aria-label="Compartir en Telegram">
+          <div class="share-icon" style="background:#2AABEE"><i class="fa-brands fa-telegram"></i></div>
+          <span>Telegram</span>
+        </button>
+        <button class="share-item" data-share="messenger" aria-label="Compartir en Messenger">
+          <div class="share-icon" style="background:#0084FF"><i class="fa-brands fa-facebook-messenger"></i></div>
+          <span>Messenger</span>
+        </button>
+        <button class="share-item" data-share="email" aria-label="Compartir por Email">
+          <div class="share-icon" style="background:#EA4335"><i class="fa-solid fa-envelope"></i></div>
+          <span>Email</span>
+        </button>
+        <button class="share-item" data-share="sms" aria-label="Compartir por SMS">
+          <div class="share-icon" style="background:#34B7F1"><i class="fa-solid fa-sms"></i></div>
+          <span>SMS</span>
+        </button>
+        <button class="share-item" data-share="copy" aria-label="Copiar enlace">
+          <div class="share-icon" style="background:#64748B"><i class="fa-solid fa-link"></i></div>
+          <span>Copiar</span>
+        </button>
+      </div>
+      <div class="share-toast" id="shareToast">¡Enlace copiado!</div>
+    </div>
+  </div>
+
+  <audio id="audioPlayer" src="https://miestacion.turadioonline.com.ar:8286/stream" crossorigin="anonymous" preload="none"></audio>
+
+  <script src="app.min.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
